@@ -48,6 +48,32 @@ def dice_string(num, var=6):
         rolls += str(random.randint(1, var))
     return rolls
 
+def dice_reroll(num, var=6, reroll=[1], times=0):
+    '''
+    Rerolls dice that are in reroll amount of times.
+    Times = 0 means reroll til value is not in reroll
+    '''
+    if isinstance(reroll, int):
+        reroll = [reroll]
+    if not isinstance(reroll, list):
+        print("Invalid value for reroll")
+        quit()
+    
+    roll = dice(num, var)
+    
+    if times % 1 != 0 or times < 0:
+        print("Invalid value for times")
+        quit()
+    elif times == 0:
+        while any(dice in reroll for dice in roll):
+            roll = [dice(1,var)[0] if time in reroll else time for time in roll]
+    else:
+        for time in range(1,times+1):
+            roll = [dice(1,var)[0] if time in reroll else time for time in roll]
+    return roll
+            
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="""
