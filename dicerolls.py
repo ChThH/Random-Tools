@@ -1,42 +1,47 @@
 import random
 import argparse
+import sys
 
 
-def dice(num, var=6):
+def dice(num, var=6, fun=True):
     '''Rolls a num(ber) of var(ible) sided dice'''
-    if num % 1 != 0:
-        print('I\'m not rolling a fractional die for anyone.')
-        quit()
-    if var % 1 != 0:
-        print('Seriously, I can\'t roll dice with fractional sides; what would that even mean?')
-        quit()
-    if num == 0:
-        print('So you don\'t want to roll any dice.')
-        quit()
-    if num < 0:
-        print('Negative numbers, huh? \nOkay, you roll the dice then. Let me know how it goes.')
-        quit()
-    if var < 1:
-        print ("I see you're unfamiliar with dice. Dice must have at least one side.")
-        quit()
-
-    if num == 1 and var == 1:
-        print('What\'s the point of rolling a 1-sided die?')
-    elif num == 1 and var == 2:
-        print('So you\'re flipping a coin.')
-    elif var == 1:
-        print("What's the point of rolling 1-sided dice?")
-    elif var == 2:
-        print('Let the coin flipping begin!')
-
-    num = int(num)
-    var = int(var)
-
-    rolls = list()
-    for each in range(num):
-        # print(each)
-        rolls.append(random.randint(1, var))
-    return rolls
+    try:
+        if fun == True:
+            if num % 1 != 0:
+                msg = 'I\'m not rolling a fractional die for anyone.'
+                raise(ValueError)
+            if var % 1 != 0:
+                msg = 'Seriously, I can\'t roll dice with fractional sides; what would that even mean?'
+                raise (ValueError)
+            if num == 0:
+                print('So you don\'t want to roll any dice.')
+            if num < 0:
+                print('Negative numbers, huh? \nOkay, you roll the dice then. Let me know how it goes.')
+            if var < 1:
+                print ("I see you're unfamiliar with dice. Dice must have at least one side.")
+            if num == 1 and var == 1:
+                print('What\'s the point of rolling a 1-sided die?')
+            elif num == 1 and var == 2:
+                print('So you\'re flipping a coin.')
+            elif var == 1:
+                print('What\'s the point of rolling 1-sided dice?')
+            elif var == 2:
+                print('Let the coin flipping begin!')
+        else:
+            if num < 1 or num % 1 != 0:
+                msg = 'Number of dice invalid.'
+                raise(ValueError)
+            elif var % 1 != 0 or var < 1:
+                msg = 'Sides of dice invalid.'
+                raise(ValueError)
+    except(ValueError):
+        print(msg)
+    else:
+        rolls = list()
+        for each in range(num):
+            # print(each)
+            rolls.append(random.randint(1, var))
+        return rolls
 
 
 def dice_string(num, var=6):
@@ -48,38 +53,51 @@ def dice_string(num, var=6):
         rolls += str(random.randint(1, var))
     return rolls
 
-def dice_reroll(num, var=6, reroll=[1], times=0):
+def dice_reroll(num, var=6, reroll=[1], times=0, show_times=True):
     '''
     Rerolls dice that are in reroll amount of times.
     Times = 0 means reroll til value is not in reroll
     '''
-    if isinstance(reroll, int):
-        reroll = [reroll]
-    if not isinstance(reroll, list):
-        print("Invalid value for reroll")
-        quit()
-    
-    roll = dice(num, var)
-    
-    if times % 1 != 0 or times < 0:
-        print("Invalid value for times")
-        quit()
-    elif times == 0:
-        while any(dice in reroll for dice in roll):
-            roll = [dice(1,var)[0] if time in reroll else time for time in roll]
+    try:
+        if isinstance(reroll, int):
+            reroll = [reroll]
+        elif not isinstance(reroll, list):
+            msg ='Invalid value for reroll'
+            raise(ValueError)
+        elif list(range(1, var+1)) == reroll:
+            msg = 'Reroll values cannot be same as range of dice sides.'
+            raise(ValueError)
+    except(ValueError):
+        print(msg)
     else:
-        for time in range(1,times+1):
-            roll = [dice(1,var)[0] if time in reroll else time for time in roll]
-    return roll
+        roll = dice(num, var, False)
+
+        if times % 1 != 0 or times < 0:
+            print("Invalid value for times")
+            quit()
+        elif times == 0:
+            t=1
+            while any(dice in reroll for dice in roll):
+                roll = [dice(1,var,False)[0] if time in reroll else time for time in roll]
+                t += 1
+            if show_times:
+                if t == 1:
+                    print('Dice were rolled once.')
+                else:
+                    print(f'Dice were rolled {t} times.')
+        else:
+            for time in range(1,times+1):
+                roll = [dice(1,var,False)[0] if time in reroll else time for time in roll]
+        return roll
             
 
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="""
-    This script rolls a number of variable sided dice. 
+    This script rolls a number of variable sided dice.
     """)
-    parser.add_argument("number", help="Number of dice", type=float)
+    parser.add_argument("number", nargs='?', help="Number of dice", default=2, type=float)
     parser.add_argument("--sides", help="Amount of sides of dice", default=6, type=float)
 
     args = parser.parse_args()
